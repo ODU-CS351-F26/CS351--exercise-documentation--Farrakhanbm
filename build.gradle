@@ -16,6 +16,7 @@ java {
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.7.0'
     testImplementation 'org.hamcrest:hamcrest-library:2.2'
 }
 
@@ -31,3 +32,44 @@ application { //Allows  ./gradlew run --args=path-to-test-data
     mainClass = 'edu.odu.cs.MostCommonWords'
 }
 
+
+
+def reportsDir = layout.buildDirectory.dir('reports')
+
+tasks.register('copyHtml', Copy) {
+    dependsOn 'build'
+    from 'src/main/html'
+    into reportsDir
+}
+
+tasks.register('copyDocs', Copy) {
+    dependsOn 'build', 'javadoc'
+    from layout.buildDirectory.dir('docs')
+    into reportsDir
+}
+
+tasks.register('reports') {
+    dependsOn 'build', 'javadoc', 'copyHtml', 'copyDocs'
+}
+
+def originUri = providers.exec {
+    commandLine 'git', 'remote', 'get-url', 'origin'
+    ignoreExitValue = true
+}.standardOutput.asText.get().trim()
+
+gitPublish {
+    repoUri = originUri
+    branch = 'gh-pages'
+    contents {
+        from reportsDir
+    }
+    commitMessage = 'Publish reports'
+}
+
+tasks.named('gitPublishCopy') {
+    dependsOn 'reports'
+}
+
+tasks.register('deployReports') {
+    dependsOn 'reports', 'gitPublishPush'
+}

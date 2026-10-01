@@ -1,6 +1,6 @@
 # Project Reports
 
-Your Name
+Farrakhan Muhammad
 
-* [Tests](./reports/tests/test/)
-* [JavaDoc](./reports/javadoc/)
+* [Tests](./tests/test/)
+* [JavaDoc](./javadoc/)
